@@ -2,12 +2,20 @@ const express = require("express");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 
+const fs = require("fs");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
+const publicDir = path.join(__dirname, "public");
+const hasPublicDir = fs.existsSync(publicDir);
+const staticDir = hasPublicDir ? publicDir : __dirname;
+const indexFile = hasPublicDir
+  ? path.join(publicDir, "index.html")
+  : path.join(__dirname, "index.html");
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(staticDir));
 
 const SYSTEM_PROMPT = `You are a specialist in creating Suno AI prompts based on Suno's official documentation. Your prompts must be rich, detailed and immediately usable.
 
@@ -92,7 +100,7 @@ app.post("/api/prompt", requireAuth, async (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(indexFile);
 });
 
 app.listen(PORT, () => console.log(`✅ FURNIMUSIC running on http://localhost:${PORT}`));
